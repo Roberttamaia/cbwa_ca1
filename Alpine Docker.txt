@@ -1,0 +1,20 @@
+Alpine Docker
+
+$ docker run progrium/busybox opkg-install nodejs
+Unknown package 'nodejs'.
+Collected errors:
+ * opkg_install_cmd: Cannot install package nodejs.
+
+$ docker run alpine apk add --no-cache nodejs
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.9/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.9/community/x86_64/APKINDEX.tar.gz
+(1/7) Installing ca-certificates (20190108-r0)
+(2/7) Installing c-ares (1.15.0-r0)
+(3/7) Installing libgcc (8.3.0-r0)
+(4/7) Installing http-parser (2.8.1-r0)
+(5/7) Installing libstdc++ (8.3.0-r0)
+(6/7) Installing libuv (1.23.2-r0)
+(7/7) Installing nodejs (10.14.2-r0)
+Executing busybox-1.29.3-r10.trigger
+Executing ca-certificates-20190108-r0.trigger
+OK: 31 MiB in 21 packages

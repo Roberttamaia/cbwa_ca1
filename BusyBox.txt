@@ -1,0 +1,95 @@
+Busy Box
+
+#!/usr/bin/env bash
+echo '--------------------------------------------------------------- '
+echo '           Xperia 2011 ICS Easy Rooting toolkit (v1.0)          '
+echo '                   created by DooMLoRD                          '
+echo '                    linux conversion by tshirtman               '
+echo '                "andorid emulator" trick                        '
+echo '   Credits go to all those involved in making this possible!    '
+echo '--------------------------------------------------------------- '
+echo ' [*] This script will:                                          '
+echo '     (1) root ur device using "andorid emulator" trick          '
+echo '     (2) install Busybox (1.18.4)                               '
+echo '     (3) install SU files (ICS specific)                        '
+echo '     (4) do some checks for free space, tmp directory           '
+echo '         (will remove Google Maps if required)                  '
+echo ' [*] Before u begin:                                            '
+echo '     (1) make sure u have installed adb drivers for ur device   '
+echo '     (2) enale "USB DEBUGGING"                                 '
+echo '           from (Menu\Settings\Developer Options\Development)   '
+echo '     (3) enable "UNKNOWN SOURCES"                               '
+echo '           from (Menu\Settings\Security)                        '
+echo '     (4) [OPTIONAL] increase screen timeout to 10 minutes       '
+echo '     (5) connect USB cable to PHONE and then connect to PC      '
+echo '     (6) skip "PC Companion Software" prompt on device          '
+echo '--------------------------------------------------------------- '
+echo ' CONFIRM ALL THE ABOVE THEN                                     '
+echo --- STARTING ----
+echo --- WAITING FOR DEVICE
+adb wait-for-device
+echo --- creating temporary directory
+adb shell 'cd /data/local && mkdir tmp'
+echo --- cleaning
+adb shell 'cd /data/local/tmp/ && rm *'
+echo --- symlinking tmp directory
+adb shell mv /data/local/tmp /data/local/tmp.bak
+adb shell ln -s /data /data/local/tmp
+echo --- Rebooting
+adb reboot
+echo --- WAITING FOR DEVICE TO RECONNECT
+echo --- PLEASE WAIT, THIS MAY TAKE A WHILE
+echo if it gets stuck over here for a long time then try:
+echo    disconnect usb cable and reconnect it
+echo    toggle "USB DEBUGGING" \(first disable it then enable it\)
+adb wait-for-device
+echo --- DEVICE FOUND
+echo --- enabling emulator hack
+adb shell rm /data/local.prop > /dev/null
+adb shell "echo \"ro.kernel.qemu=1\" > /data/local.prop"
+echo --- Rebooting
+adb reboot
+echo --- WAITING FOR DEVICE TO RECONNECT
+echo --- PLEASE WAIT, THIS MAY TAKE A WHILE
+echo if it gets stuck over here for a long time then try:
+echo    disconnect usb cable and reconnect it
+echo    toggle "USB DEBUGGING" \(first disable it then enable it\)
+adb wait-for-device
+echo --- DEVICE FOUND
+echo --- pushing busybox
+adb push files/busybox /data/local/tmp/.
+echo --- correcting permissions
+adb shell "chmod 755 /data/local/tmp/busybox"
+echo --- remounting /system
+adb shell "/data/local/tmp/busybox mount -o remount,rw /system"
+echo --- checking free space on /system
+adb push files/makespace /data/local/tmp/.
+adb shell "chmod 777 /data/local/tmp/makespace"
+adb shell "./data/local/tmp/makespace"
+echo --- copying busybox to /system/xbin/
+adb shell "dd if=/data/local/tmp/busybox of=/system/xbin/busybox"
+echo --- correcting ownership
+adb shell "chown root.shell /system/xbin/busybox"
+echo --- correcting permissions
+adb shell "chmod 04755 /system/xbin/busybox"
+echo --- installing busybox
+adb shell "/system/xbin/busybox --install -s /system/xbin"
+adb shell "rm -r /data/local/tmp/busybox"
+echo --- pushing SU binary
+adb push files/su /system/bin/su
+echo --- correcting ownership
+adb shell "chown root.shell /system/bin/su"
+echo --- correcting permissions
+adb shell "chmod 06755 /system/bin/su"
+echo --- correcting symlinks
+adb shell "rm /system/xbin/su"
+adb shell "ln -s /system/bin/su /system/xbin/su"
+echo --- pushing Superuser app
+adb push files/Superuser.apk /system/app/.
+echo --- cleaning
+adb shell rm /data/local.prop
+adb shell rm /data/local/tmp
+adb shell mv /data/local/tmp.bak /data/local/tmp
+echo --- rebooting
+adb reboot
+echo ALL DONE!!!
